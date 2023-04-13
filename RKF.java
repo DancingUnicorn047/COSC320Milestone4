@@ -23,28 +23,31 @@ public class RKF {
 		File dir = new File(file_location);
 		String[] Allfilenames = dir.list(); //this is an array that holds all of the names for all of the csv  files
 		
-		int n = 50;// number of input documents
+		int n = 1000000;// number of input documents
+		int fileCounter = 0;
 		
-		//prevent index out of bound
-		if(n > Allfilenames.length) {
-			n = Allfilenames.length;
-		}
 		for(int f = 0; f < n; f++) {
+			// in case n is larger than the number of files available 
+			if(fileCounter >= Allfilenames.length) {
+				break;
+			}
 			String filename = "NiceFiles_" + Integer.toString(f) + ".txt";;
 			// read all content in the file into a single string
 			String temp_file_location = file_location + "/" + filename;
 			File temp_file = new File(temp_file_location);
 			String file_content = "";
 			try(Scanner reader = new Scanner(temp_file).useDelimiter(";;;")) {
+				fileCounter++;
 				while(reader.hasNext()) {
 					String temp = reader.nextLine();
-					file_content = file_content + " " + temp.substring(0, temp.length()-3);
+					file_content = file_content + " " + temp.substring(0, temp.length());
 				}
 				//System.out.println("File read");
 				reader.close();
 			}
 			catch(Exception e) {
-				System.out.println("Can't read file \n" +e);
+				//System.out.println("Can't read file \n" +e);
+				continue;
 			}
 			// Separate into words
 			String[] document_words = file_content.split(" ");
@@ -87,16 +90,20 @@ public class RKF {
 			}
 			// if more than 24% matches
 			float percent = 100*(float)counter/test_words.length;
-			System.out.println("File: " + filename + " Repeated Words: " + counter + "  Percentage: " + percent + "%");
+			//System.out.println("File: " + filename + " Repeated Words: " + counter + "  Percentage: " + percent + "%");
 			if(percent > 0.24) {
 				Potentially_Plagiarized.add(filename);
 			}
+			if(fileCounter % 500 == 0) {
+				System.out.println("Files Checked: " + fileCounter + " Time Taken: " + (System.currentTimeMillis() - start));
+			}
 		}
+		/*
 		System.out.println("Number of Documents Potentially Plagiarized: " + Potentially_Plagiarized.size());
 		for(String file:Potentially_Plagiarized) {
 			System.out.println(file);
 		}
-		System.out.println("Files Checked: " + n);
-		System.out.println("Time Taken: " + (System.currentTimeMillis() - start));
+		*/
+		System.out.println("Files Checked: " + fileCounter + " Time Taken: " + (System.currentTimeMillis() - start));
 	}
 }
